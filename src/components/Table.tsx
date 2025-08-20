@@ -55,7 +55,6 @@ const tableColumns: TableColumnsType<DataType> = [
     sorter: {
       compare: (a, b) => a.number - b.number,
       multiple: 2,
-
     }
   },
   {

@@ -1,6 +1,6 @@
-import InputNumberComp from "./components/UI/InputNumber"
 import TableComp from "./components/Table"
-import InputComp from "./components/UI/Input"
+import FormComp from "./components/Form"
+import { Button } from "antd"
 
 function App() {
 
@@ -8,9 +8,10 @@ function App() {
     <>
     {/* {кнопка добавить => модалка с дабавлением полей таблицы + валидация } */}
     {/* { при работе с рактированием - модалка с заполненными полями для измения } */}
+    <Button  htmlType="button" onClick={()=> console.log('add')}>Add new record</Button>
     <TableComp/>
-    <InputNumberComp/>
-    <InputComp/>
+
+    <FormComp/>
     </>
   )
 }
