@@ -1,16 +1,10 @@
-import { Button, Table, type TableColumnsType } from "antd";
-import type React from "react";
-
+import { Button, Input, Space, Table, type TableColumnsType } from "antd";
+import type { TableDataType } from "../types/dataTypes";
 /*
 - Реализовать поиск по всем ячейкам таблицы с инпутом над таблицей   */
-/*  удалить / реадктировать -(можно иконкой) */
+/* таблица -имя - дата - числовое значение - действия: удалить / реадктировать -(можно иконкой) */
 
-interface DataType {
-  key: React.Key,
-  name: string,
-  number: number,
-  date: string,
-}
+
 
 const tableData = [{
   key: '1',
@@ -38,7 +32,7 @@ const tableData = [{
 },
 ];
 
-const tableColumns: TableColumnsType<DataType> = [
+const tableColumns: TableColumnsType<TableDataType> = [
   {
     title: 'Name',
     dataIndex: 'name',
@@ -46,7 +40,10 @@ const tableColumns: TableColumnsType<DataType> = [
     sorter: {
       compare: (a, b) => a.name.localeCompare(b.name),
       multiple: 1,
-    }
+    },
+    onFilter: (value, record) => {
+      return record.name.includes(value as string)
+    },
   },
   {
     title: 'Number',
@@ -55,14 +52,17 @@ const tableColumns: TableColumnsType<DataType> = [
     sorter: {
       compare: (a, b) => a.number - b.number,
       multiple: 2,
-    }
+    },
+    onFilter: (value, record) => {
+      return record.name.includes(value as string)
+    },
   },
   {
     title: 'Date',
     dataIndex: 'date',
     key: 'date',
     sorter: {
-      compare:(a, b) => { 
+      compare: (a, b) => {
         const date1 = new Date(a.date)
         const date2 = new Date(b.date)
         return date1.getTime() - date2.getTime()
@@ -73,20 +73,22 @@ const tableColumns: TableColumnsType<DataType> = [
   {
     title: 'Actions',
     dataIndex: '',
-    key: '+',
-    render: () => <>
-      <Button onClick={() => console.log('edit')}>Edit</Button>
-      <Button onClick={() => console.log('delete')}>Delete</Button>
-    </>
+    key: 'actions',
+    render: (_, record) => (
+      <Space size='middle'>
+        <Button onClick={() => console.log('edit', record.key)}>Edit</Button>
+        <Button onClick={() => console.log('delete', record.key)}>Delete</Button>
+      </Space>)
   }
 ];
 
 
-
-
 const TableComp = ({ data = tableData, columns = tableColumns }: { data?: DataType[], columns?: TableColumnsType<DataType> }) => {
   return (
-    <Table<DataType> dataSource={data} columns={columns} />
+    <Space>
+      <Input/>
+      <Table<TableDataType> dataSource={data} columns={columns} />
+    </Space>
   )
 }
 

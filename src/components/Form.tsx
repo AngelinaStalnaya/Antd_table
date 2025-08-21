@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   DatePicker,
@@ -6,7 +6,6 @@ import {
   Input,
   InputNumber,
   Space,
-
 } from 'antd';
 
 
@@ -21,23 +20,31 @@ const formItemLayout = {
   },
 };
 
-const FormComp: React.FC = () => {
+const FormComp = ({ initialFormValues }: { initialFormValues?: FormData | null }) => {
   const [form] = Form.useForm();
   const [submittable, setSubmittable] = useState<boolean>(false);
   const values = Form.useWatch([], form)
 
-  const onReset = () => 
+  const onReset = () =>
     form.resetFields();
 
   const onFinish = (values: FormData) => {
     console.log(values)
+    onReset()
   }
 
-  useEffect(()=> {
-    form.validateFields({validateOnly: true})
-    .then(()=> setSubmittable(true))
-    .catch(()=> setSubmittable(false))
+  useEffect(() => {
+    form.validateFields({ validateOnly: true })
+      .then(() => setSubmittable(true))
+      .catch(() => setSubmittable(false))
+    return
   }, [form, values])
+
+  useEffect(() => {
+    if (initialFormValues) {
+      form.setFieldsValue(initialFormValues)
+    }
+  }, [form, initialFormValues])
 
   return (
     <Form
@@ -49,7 +56,7 @@ const FormComp: React.FC = () => {
       onFinish={onFinish}
     >
       <Form.Item label="Name" name="nameInput" rules={[{ required: true, min: 1, message: 'Name required!' }]}>
-        <Input/>
+        <Input />
       </Form.Item>
 
       <Form.Item
@@ -62,7 +69,7 @@ const FormComp: React.FC = () => {
 
       <Form.Item
         label="Date"
-        name="DatePicker"
+        name="datePicker"
         rules={[{ required: true, message: 'Date required!' }]}
       >
         <DatePicker />
@@ -71,12 +78,14 @@ const FormComp: React.FC = () => {
 
       <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
         <Space>
-        <Button type="primary" htmlType="submit" disabled={!submittable}>
-          Submit
-        </Button>
-        <Button type='default' htmlType='button' onClick={onReset} >
-          Reset
-        </Button>
+          <Button type="primary" htmlType="submit" disabled={!submittable}>
+            Submit
+          </Button>
+          {initialFormValues &&
+            <Button type='default' htmlType='button' onClick={onReset} >
+              Reset
+            </Button>}
+
         </Space>
       </Form.Item>
     </Form>
