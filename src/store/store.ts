@@ -4,19 +4,21 @@ import { tableData } from "./initialState";
 
 type RecordStoreState = {
   records: Array<TableDataType>;
-  setInitialRecordsArray: (recordsArray: Array<TableDataType>) => void;
+  filterRecords: (filter: string) => Array<TableDataType>;
   setRecord: (newRecord: TableDataType) => void;
   deleteRecord: (recordId: string) => void;
-  updateRecord: (
-    recordId: string,
-    newRecord: TableDataType
-  ) => void;
+  updateRecord: (recordId: string, newRecord: TableDataType) => void;
 };
 
-export const useStore = create<RecordStoreState>()((set) => ({
+export const useStore = create<RecordStoreState>()((set, get) => ({
   records: tableData,
-  setInitialRecordsArray: (recordsArray: Array<TableDataType>) =>
-    set({ records: recordsArray }),
+  filterRecords: (filter: string) =>
+    get().records.filter(
+      (record: TableDataType) =>
+        record.name.toLowerCase().includes(filter.toLowerCase()) ||
+        (record.number + "").includes(filter) ||
+        record.date.includes(filter)
+    ),
   setRecord: (newRecord: TableDataType) =>
     set((state) => ({ records: [...state.records, newRecord] })),
   deleteRecord: (recordId: string) =>
@@ -25,10 +27,7 @@ export const useStore = create<RecordStoreState>()((set) => ({
         (rec: TableDataType) => rec.key !== recordId
       ),
     })),
-  updateRecord: (
-    recordId: string,
-    newRecord: TableDataType
-  ) =>
+  updateRecord: (recordId: string, newRecord: TableDataType) =>
     set((state) => ({
       records: state.records.map((rec: TableDataType) =>
         rec["key"] === recordId ? { ...rec, ...newRecord } : rec

@@ -47,7 +47,6 @@ const FormComp = ({  recordValues, addOpt, updateOpt }: FormCompProps) => {
     if (!record.get('key')) {
       record.append('key', uuidv4())
     }
-    console.log(record.values())
     return Object.fromEntries(record.entries())
   }
 
