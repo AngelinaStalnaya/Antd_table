@@ -1,27 +1,34 @@
-import TableComp, { type DataType } from "./components/Table"
-import { Button, Space } from "antd"
+import TableComp from "./components/Table"
+import { Space, Input } from "antd"
 import ModalComp from "./components/Modal"
-import dayjs from "dayjs"
-
-const initialValues = (data: DataType) => {
-  const dateformat = 'YYYY-MM-DD';
-
-  return {
-    nameInit: data.name,
-    numberInit: data.number,
-    dateInit: dayjs(data.date, dateformat),
-  }
-}
-
-const 
+import { useStore } from "./store/store"
+import { useEffect, useState } from "react"
+// import { TableDataType } from "./types/dataTypes"
 
 function App() {
+  const records = useStore((state) => state.records)
+  const [inputValue, setInputValue] = useState<string>('')
+  const [req, setReq] = useState<TableDataType[]>([])
+
+  const change = (e: string) => {
+    setInputValue(e)
+  }
+
+  useEffect(() => {
+    setReq(records.filter(record => {
+      return record.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+      (record.number + '').includes(inputValue) ||
+      record.date.includes(inputValue)
+    }))
+  }, [req, inputValue])
+// todo add store method to retrieve filtered values
   return (
-    <Space>
-      <Button htmlType="button" onClick={() => console.log('add')}>Add new record</Button>
-      <TableComp />
-      <ModalComp btnContent='add' title='Create new record' />
-      <ModalComp btnContent="edit" title='Edit record' />
+    <Space direction="vertical">
+      <Space>
+        <Input onChange={(e) => change(e.target.value)} />
+        <ModalComp btnContent='Add new record' title='Create new record' />
+      </Space>
+      <TableComp data={req} />
     </Space>
   )
 }

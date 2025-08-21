@@ -1,10 +1,23 @@
-import { useState } from 'react';
 import { Button, Modal } from 'antd';
 import FormComp from './Form';
+import { useStore } from '../store/store';
+import { useState } from 'react';
+import type { TableDataType } from '../types/dataTypes';
 
-const ModalComp = ({ btnContent, title, initialFormValues }: { btnContent: string, title: string, initialFormValues?: FormData }) => {
+type ModalCompProps = {
+  btnContent: string,
+  title: string,
+  record?: TableDataType | null,
+  id?: string,
+}
+
+const ModalComp = ({ btnContent, title, record, id }: ModalCompProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+  const addRecord = useStore((state) => state.setRecord);
+  const updateRecord = useStore((state) => state.updateRecord);
+  const deleteRecord = useStore((state) => state.deleteRecord);
+  
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -17,6 +30,9 @@ const ModalComp = ({ btnContent, title, initialFormValues }: { btnContent: strin
     setIsModalOpen(false);
   };
 
+  const handleDeleteRecord = (id: string) => {
+    deleteRecord(id)
+  }
 
   return (
     <>
@@ -31,7 +47,10 @@ const ModalComp = ({ btnContent, title, initialFormValues }: { btnContent: strin
         onCancel={handleCancel}
         centered
       >
-        <FormComp initialFormValues={initialFormValues} />
+        {record && <FormComp recordValues={record} updateOpt={updateRecord} />}
+        {id && <Button type='primary' onClick={() => handleDeleteRecord(id)}>Delete anyway</Button>}
+        {!record && !id && <FormComp addOpt={addRecord}/>}
+
       </Modal>
     </>
   );

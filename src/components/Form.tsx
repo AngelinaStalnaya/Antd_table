@@ -7,6 +7,9 @@ import {
   InputNumber,
   Space,
 } from 'antd';
+import type { TableDataType } from '../types/dataTypes';
+import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
 
 
 const formItemLayout = {
@@ -20,31 +23,62 @@ const formItemLayout = {
   },
 };
 
-const FormComp = ({ initialFormValues }: { initialFormValues?: FormData | null }) => {
+type FormCompProps = {
+  recordValues?: TableDataType | null,
+  addOpt?: (newRecord: TableDataType) => void | undefined,
+  updateOpt?: (recordId: string, newRecord: TableDataType) => void | undefined,
+}
+
+const FormComp = ({  recordValues, addOpt, updateOpt }: FormCompProps) => {
   const [form] = Form.useForm();
   const [submittable, setSubmittable] = useState<boolean>(false);
   const values = Form.useWatch([], form)
 
-  const onReset = () =>
-    form.resetFields();
+  const onReset = () => form.resetFields();
+
+  const addNewRecord = (data: FormData) => {
+    const record = new FormData;
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'date') {
+        value = dayjs(value).format('DD-MM-YYYY')
+      }
+      record.append(key, value);
+    });
+    if (!record.get('key')) {
+      record.append('key', uuidv4())
+    }
+    console.log(record.values())
+    return Object.fromEntries(record.entries())
+  }
 
   const onFinish = (values: FormData) => {
-    console.log(values)
-    onReset()
+    const result = addNewRecord(values)
+
+    if (addOpt) {
+      addOpt(result as unknown as TableDataType)
+      onReset()
+    }
+    // todo: refactor  as-as clause
+
+    if (updateOpt) {
+      updateOpt(recordValues?.key as string, result as unknown as TableDataType)
+    }
   }
 
   useEffect(() => {
     form.validateFields({ validateOnly: true })
       .then(() => setSubmittable(true))
-      .catch(() => setSubmittable(false))
-    return
+      .catch(() => {setSubmittable(false)})
   }, [form, values])
 
   useEffect(() => {
-    if (initialFormValues) {
-      form.setFieldsValue(initialFormValues)
+    if (recordValues) {
+      const v = JSON.parse(JSON.stringify(recordValues))
+      v.date = dayjs(recordValues.date)
+      form.setFieldsValue(v)
+      setSubmittable(true)
     }
-  }, [form, initialFormValues])
+  }, [form, recordValues])
 
   return (
     <Form
@@ -53,15 +87,15 @@ const FormComp = ({ initialFormValues }: { initialFormValues?: FormData | null }
       variant='outlined'
       style={{ maxWidth: 600 }}
       size='large'
-      onFinish={onFinish}
+      onFinish={(values) => onFinish(values as FormData)}
     >
-      <Form.Item label="Name" name="nameInput" rules={[{ required: true, min: 1, message: 'Name required!' }]}>
+      <Form.Item label="Name" name="name" rules={[{ required: true, min: 1, message: 'Name required!' }]}>
         <Input />
       </Form.Item>
 
       <Form.Item
         label="Number"
-        name="numberInput"
+        name="number"
         rules={[{ required: true, message: 'Number required!' }]}
       >
         <InputNumber style={{ width: '100%' }} />
@@ -69,10 +103,10 @@ const FormComp = ({ initialFormValues }: { initialFormValues?: FormData | null }
 
       <Form.Item
         label="Date"
-        name="datePicker"
+        name="date"
         rules={[{ required: true, message: 'Date required!' }]}
       >
-        <DatePicker />
+        <DatePicker format='DD/MM/YYYY'/>
       </Form.Item>
 
 
@@ -81,11 +115,10 @@ const FormComp = ({ initialFormValues }: { initialFormValues?: FormData | null }
           <Button type="primary" htmlType="submit" disabled={!submittable}>
             Submit
           </Button>
-          {initialFormValues &&
+          {recordValues &&
             <Button type='default' htmlType='button' onClick={onReset} >
               Reset
             </Button>}
-
         </Space>
       </Form.Item>
     </Form>

@@ -1,36 +1,6 @@
-import { Button, Input, Space, Table, type TableColumnsType } from "antd";
+import { Space, Table, type TableColumnsType } from "antd";
 import type { TableDataType } from "../types/dataTypes";
-/*
-- Реализовать поиск по всем ячейкам таблицы с инпутом над таблицей   */
-/* таблица -имя - дата - числовое значение - действия: удалить / реадктировать -(можно иконкой) */
-
-
-
-const tableData = [{
-  key: '1',
-  name: 'John Brown',
-  number: 32,
-  date: '2025-08-15',
-},
-{
-  key: '2',
-  name: 'Mike Green',
-  number: 42,
-  date: '2024-12-08',
-},
-{
-  key: '3',
-  name: 'Kate Black',
-  number: 32,
-  date: '2025-05-18',
-},
-{
-  key: '4',
-  name: 'Disabled User',
-  number: 99,
-  date: '2023-07-29',
-},
-];
+import ModalComp from "./Modal";
 
 const tableColumns: TableColumnsType<TableDataType> = [
   {
@@ -41,6 +11,7 @@ const tableColumns: TableColumnsType<TableDataType> = [
       compare: (a, b) => a.name.localeCompare(b.name),
       multiple: 1,
     },
+    filterSearch: true,
     onFilter: (value, record) => {
       return record.name.includes(value as string)
     },
@@ -53,6 +24,7 @@ const tableColumns: TableColumnsType<TableDataType> = [
       compare: (a, b) => a.number - b.number,
       multiple: 2,
     },
+    filterSearch: true,
     onFilter: (value, record) => {
       return record.name.includes(value as string)
     },
@@ -66,7 +38,7 @@ const tableColumns: TableColumnsType<TableDataType> = [
         const date1 = new Date(a.date)
         const date2 = new Date(b.date)
         return date1.getTime() - date2.getTime()
-      },
+    },
       multiple: 3,
     }
   },
@@ -76,19 +48,20 @@ const tableColumns: TableColumnsType<TableDataType> = [
     key: 'actions',
     render: (_, record) => (
       <Space size='middle'>
-        <Button onClick={() => console.log('edit', record.key)}>Edit</Button>
-        <Button onClick={() => console.log('delete', record.key)}>Delete</Button>
+        <ModalComp btnContent="Edit" title='Edit record' record={record} />
+        <ModalComp btnContent='Delete' title='Record delete' id={record.key}/>
       </Space>)
   }
 ];
 
+type TableCompProps = {
+  data: TableDataType[],
+  columns?: TableColumnsType<TableDataType>
+}
 
-const TableComp = ({ data = tableData, columns = tableColumns }: { data?: DataType[], columns?: TableColumnsType<DataType> }) => {
+const TableComp = ({ data, columns = tableColumns }: TableCompProps) => {
   return (
-    <Space>
-      <Input/>
-      <Table<TableDataType> dataSource={data} columns={columns} />
-    </Space>
+    <Table<TableDataType> dataSource={data} columns={columns} />
   )
 }
 

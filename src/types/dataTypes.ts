@@ -1,5 +1,5 @@
 export interface TableDataType {
-  key: React.Key,
+  key: string,
   name: string,
   number: number,
   date: string,
